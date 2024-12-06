@@ -1,7 +1,7 @@
-#ifndef TINY_HUMAN_DETECTION_MODEL_DATA_H_
-#define TINY_HUMAN_DETECTION_MODEL_DATA_H_
+#ifndef FMNIST_FROZEN_MICRO_MODEL_H
+#define FMNIST_FROZEN_MICRO_MODEL_H
 
-extern const unsigned char micro_model[];
-extern const unsigned int micro_model_len;
+extern const unsigned char fmnist_frozen_micro_model_cc_data[];
+extern const unsigned int fmnist_frozen_micro_model_cc_data_len;
 
-#endif
+#endif // FMNIST_FROZEN_MICRO_MODEL_H

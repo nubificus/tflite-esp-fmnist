@@ -1,12 +1,15 @@
 #pragma once
 
-#include "PredictionInterpreter.h"
+#include <vector>
+#include <string>
+#include <utility>
 
 class PredictionHandler {
- public:
-  PredictionHandler() = default;
-  ~PredictionHandler() = default;
-  void Update(Prediction prediction);
+public:
+	PredictionHandler(const std::vector<std::string>& labels);
+	void Update(const std::vector<std::pair<int, float>>& predictions);
 
- private:
+private:
+	std::vector<std::string> labels;
+	std::string GetLabel(int label);
 };

@@ -1,15 +1,15 @@
 #pragma once
 
+#include <vector>
+#include <string>
 #include "tensorflow/lite/c/common.h"
 
-enum class Prediction {
-  UNKNOWN = 0
-  // add your predictions
-};
-
 class PredictionInterpreter {
- public:
-  PredictionInterpreter() = default;
-  ~PredictionInterpreter() = default;
-  virtual Prediction GetResult(TfLiteTensor* model_output);
+public:
+	PredictionInterpreter();
+	std::vector<std::pair<int, float>> GetResult(const TfLiteTensor* output_tensor, float threshold);
+
+private:
+	void Dequantize(const TfLiteTensor* output_tensor, std::vector<float>& output_data);
+	std::vector<std::pair<int, float>> Sort(const std::vector<float>& data, float threshold);
 };

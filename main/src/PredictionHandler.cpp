@@ -1,10 +1,20 @@
 #include "PredictionHandler.h"
+#include <iostream>
+#include <iomanip>
 
-void PredictionHandler::Update(Prediction prediction) {
-  switch (prediction) {
-    case Prediction::UNKNOWN:
-      break;
-    default:
-      break;
-  }
+PredictionHandler::PredictionHandler(const std::vector<std::string>& labels) : labels(labels) {}
+
+void PredictionHandler::Update(const std::vector<std::pair<int, float>>& predictions) {
+	for (const auto& prediction : predictions) {
+		std::cout << "Label " << GetLabel(prediction.first)
+				  << ": " << std::fixed << std::setprecision(4)
+				  << prediction.second * 100 << "%" << std::endl;
+	}
+}
+
+std::string PredictionHandler::GetLabel(int label) {
+	if (label >= 0 && label < labels.size())
+		return labels[label];
+	
+	return std::to_string(label);
 }

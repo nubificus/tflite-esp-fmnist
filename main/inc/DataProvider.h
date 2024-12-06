@@ -1,13 +1,18 @@
 #pragma once
 
-#include <vector>
+#include "tensorflow/lite/c/common.h"
+#include <iterator>
 
 class DataProvider {
- public:
-  DataProvider() = default;
-  ~DataProvider() = default;
-  bool Init();
-  std::vector<float> Read();
+	public:
+	bool Init();
+	int Read(TfLiteTensor* modelInput);
 
- private:
+	private:
+	static constexpr int kNumCols = 28;
+	static constexpr int kNumRows = 28;
+	static constexpr int kMaxImageSize = kNumCols * kNumRows;
+	static constexpr int IMAGE_COUNT = 10;
+	static const float* image_database[IMAGE_COUNT];
 };
+
