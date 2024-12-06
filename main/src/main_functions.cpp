@@ -12,9 +12,12 @@
 #include "tensorflow/lite/micro/micro_interpreter.h"
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
+#include "esp_timer.h"
 
 // delay connstant -> 1 sec
 #define pdSECOND pdMS_TO_TICKS(1000)
+
+extern std::vector<std::string> labels;
 
 namespace {
 	// declare ErrorReporter, a TfLite class for error logging
@@ -26,9 +29,6 @@ namespace {
 	// declare model input and output as 1D-arrays
 	TfLiteTensor *model_input = nullptr;
 	TfLiteTensor *model_output = nullptr;
-
-	std::vector<std::string> labels = {"T-shirt_top", "Trouser", "Pullover", "Dress", "Coat",
-										"Sandal", "Shirt", "Sneaker", "Bag", "Ankle_boot"};
 	// create an area of memory to use for input, output, and intermediate arrays.
 	// the size of this will depend on the model you're using, and may need to be
 	// determined by experimentation.
@@ -93,20 +93,28 @@ void loop() {
 	// Read test data and copy them to the model input tensor
 	if (data_provider.Read(model_input)) {
 		error_reporter->Report("Failed ro read next image");
+		return;
 	}
 
 	// Run inference on pre-processed data
+	long long start_time = esp_timer_get_time();
+
 	TfLiteStatus invoke_status = interpreter->Invoke();
 	if (invoke_status != kTfLiteOk) {
 		error_reporter->Report("Invoke failed");
 		return;
 	}
 
+	long long inference_time = esp_timer_get_time() - start_time;
+
 	// Interpret raw model predictions
 	auto prediction = prediction_interpreter.GetResult(model_output, 0.0);
 
 	// Act upon processed predictions
 	prediction_handler.Update(prediction);
+
+	// Report inference time
+	printf("Inference time: %lld ms\n\n", inference_time / 1000);
 
 	vTaskDelay(0.5 * pdSECOND);
 }
