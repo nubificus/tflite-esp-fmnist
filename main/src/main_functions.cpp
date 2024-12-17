@@ -13,11 +13,10 @@
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/schema/schema_generated.h"
 #include "esp_timer.h"
+#include <esp_log.h>
 
 // delay connstant -> 1 sec
 #define pdSECOND pdMS_TO_TICKS(1000)
-
-extern std::vector<std::string> labels;
 
 namespace {
 	// declare ErrorReporter, a TfLite class for error logging
@@ -35,6 +34,11 @@ namespace {
 	constexpr int kTensorArenaSize = 140 * 1024;
 	alignas(16) uint8_t tensor_arena[kTensorArenaSize];
 
+	static const char *TAG = "[esp_cli]";
+
+	// Declare labels for the Fashion MNIST dataset
+	std::vector<std::string> labels = {"T-shirt_top", "Trouser", "Pullover", "Dress", "Coat",
+									"Sandal", "Shirt", "Sneaker", "Bag", "Ankle_boot"};
 	// processing pipeline
 	DataProvider data_provider;
 	PredictionInterpreter prediction_interpreter;
@@ -110,11 +114,15 @@ void loop() {
 	// Interpret raw model predictions
 	auto prediction = prediction_interpreter.GetResult(model_output, 0.0);
 
-	// Act upon processed predictions
-	prediction_handler.Update(prediction);
+	// Send the result to the server
+	prediction_handler.Update(prediction, data_provider.sock);
 
-	// Report inference time
-	printf("Inference time: %lld ms\n\n", inference_time / 1000);
+	// Send inference time to the server
+	if (resp(data_provider.sock, (void*) &inference_time, sizeof(inference_time)) < 0) {
+		ESP_LOGE(TAG, "Failed to send response to server");
+		close(data_provider.sock);
+		vTaskDelete(NULL);
+	}
 
 	vTaskDelay(0.5 * pdSECOND);
 }

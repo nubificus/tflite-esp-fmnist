@@ -1,7 +1,7 @@
 idf_component_register(
 	SRCS ""
 	INCLUDE_DIRS ""
-	EMBED_FILES "T-shirt_top.bin"
+	EMBED_FILES "Tshirt_top.bin"
 				"Trouser.bin"
 				"Pullover.bin"
 				"Dress.bin"

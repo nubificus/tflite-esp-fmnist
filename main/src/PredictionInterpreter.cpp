@@ -4,15 +4,22 @@
 
 PredictionInterpreter::PredictionInterpreter() {}
 
-std::vector<std::pair<int, float>> PredictionInterpreter::GetResult(const TfLiteTensor* output_tensor, float threshold) {
+std::vector<float> PredictionInterpreter::GetResult(const TfLiteTensor* output_tensor, float threshold) {
 	const float* output_data = output_tensor->data.f;
 	std::vector<float> output_vector(output_data, output_data + output_tensor->bytes / sizeof(float));
 
 	// Handle quantized output
 	Dequantize(output_tensor, output_vector);
 
-	// Sort the results
-	return Sort(output_vector, threshold);
+	// Remove elements with scores below the threshold
+	for (auto it = output_vector.begin(); it != output_vector.end(); ) {
+		if (*it < threshold) {
+			it = output_vector.erase(it);
+		} else {
+			++it;
+		}
+	}
+	return output_vector;
 }
 
 void PredictionInterpreter::Dequantize(const TfLiteTensor* output_tensor, std::vector<float>& output_data) {
@@ -26,17 +33,4 @@ void PredictionInterpreter::Dequantize(const TfLiteTensor* output_tensor, std::v
 			}
 		}
 	}
-}
-
-std::vector<std::pair<int, float>> PredictionInterpreter::Sort(const std::vector<float>& data, float threshold) {
-	std::vector<std::pair<int, float>> results;
-	for (size_t i = 0; i < data.size(); ++i) {
-		if (data[i] >= threshold) {
-			results.emplace_back(i, data[i]);
-		}
-	}
-	std::sort(results.begin(), results.end(), [](const std::pair<int, float>& a, const std::pair<int, float>& b) {
-		return a.second > b.second;
-	});
-	return results;
 }

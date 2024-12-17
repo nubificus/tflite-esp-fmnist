@@ -1,17 +1,22 @@
 #include "PredictionHandler.h"
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <esp_log.h>
+
 #include <iostream>
 #include <iomanip>
 
+static const char *TAG = "[esp_cli]";
+
 PredictionHandler::PredictionHandler(const std::vector<std::string>& labels) : labels(labels) {}
 
-void PredictionHandler::Update(const std::vector<std::pair<int, float>>& predictions) {
-	std::cout << "#----Start Inference Results----#" << std::endl;
-	for (const auto& prediction : predictions) {
-		std::cout << "Label " << GetLabel(prediction.first)
-				  << ": " << std::fixed << std::setprecision(4)
-				  << prediction.second * 100 << "%" << std::endl;
+void PredictionHandler::Update(const std::vector<float>& predictions, int sock) {
+	if (resp(sock, (void*) predictions.data(), predictions.size() * sizeof(float)) < 0) {
+		ESP_LOGE(TAG, "Failed to send response to server");
+		close(sock);
+		vTaskDelete(NULL);
 	}
-	std::cout << "#-----End Inference Results-----#" << std::endl;
 }
 
 std::string PredictionHandler::GetLabel(int label) {
