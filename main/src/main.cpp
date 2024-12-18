@@ -24,7 +24,7 @@ extern "C" void app_main() {
 
 	ESP_ERROR_CHECK(ret);
 
-	esp_err_t status = connect_wifi("nbfc-iot", "nbfcIoTOTA");
+	esp_err_t status = connect_wifi("ssid", "password");
 
 	if (WIFI_SUCCESS != status) {
 		ESP_LOGI("main", "Failed to associate to AP, dying...");
