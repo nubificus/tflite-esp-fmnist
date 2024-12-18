@@ -36,13 +36,10 @@ namespace {
 
 	static const char *TAG = "[esp_cli]";
 
-	// Declare labels for the Fashion MNIST dataset
-	std::vector<std::string> labels = {"T-shirt_top", "Trouser", "Pullover", "Dress", "Coat",
-									"Sandal", "Shirt", "Sneaker", "Bag", "Ankle_boot"};
 	// processing pipeline
 	DataProvider data_provider;
 	PredictionInterpreter prediction_interpreter;
-	PredictionHandler prediction_handler(labels);
+	PredictionHandler prediction_handler;
 } // namespace
 
 void setup() {
